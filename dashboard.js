@@ -7,84 +7,116 @@ const healthyRanges = {
     activity: { min: 7000, max: 10000 }
 };
 
-// Inicialización del gráfico
+// Variables para el gráfico y datos históricos
 let metricsChart;
 let currentMetric = 'heartRate';
 let historicalData = {
-    heartRate: [],
-    bloodPressure: [],
-    timestamps: []
+    heartRate: Array(20).fill(80),
+    bloodPressure: Array(20).fill(100),
+    sleep: Array(20).fill(7.5),
+    activity: Array(20).fill(8500),
+    timestamps: Array(20).fill('')
+};
+
+// Valores actuales para mantener la continuidad
+let currentValues = {
+    heartRate: 80,
+    bloodPressure: { systolic: 100, diastolic: 70 },
+    sleep: 7.5,
+    activity: 8500
 };
 
 // Función para generar datos más dinámicos
-function getRandomValue(min, max, previousValue = null) {
+function getRandomValue(min, max, previousValue = null, isDecimal = false) {
     if (previousValue === null) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+        const value = Math.random() * (max - min) + min;
+        return isDecimal ? Number(value.toFixed(1)) : Math.round(value);
     }
     
-    // Generar una tendencia aleatoria
     const trend = Math.random() > 0.5 ? 1 : -1;
-    const maxChange = (max - min) * 0.15; // Permite cambios de hasta 15%
+    const maxChange = (max - min) * 0.05; // Cambio más suave del 5%
     const change = Math.random() * maxChange * trend;
     
     let newValue = previousValue + change;
-    // Asegurar que el valor esté dentro de los límites
     if (newValue < min) newValue = min + Math.random() * maxChange;
     if (newValue > max) newValue = max - Math.random() * maxChange;
     
-    return Math.round(newValue);
+    return isDecimal ? Number(newValue.toFixed(1)) : Math.round(newValue);
 }
 
 // Función para actualizar el estado visual de una métrica
 function updateMetricStatus(metricId, value, range) {
     const statusElement = document.getElementById(`${metricId}Status`);
     const isHealthy = value >= range.min && value <= range.max;
-    statusElement.className = `status-indicator ${isHealthy ? '' : 'warning'}`;
+    statusElement.className = `status-indicator${isHealthy ? '' : ' warning'}`;
+}
+
+// Función para actualizar el sueño
+function updateSleep() {
+    currentValues.sleep = getRandomValue(
+        healthyRanges.sleep.min - 1,
+        healthyRanges.sleep.max + 1,
+        currentValues.sleep,
+        true
+    );
+    
+    document.getElementById('sleepValue').textContent = currentValues.sleep;
+    updateMetricStatus('sleep', currentValues.sleep, healthyRanges.sleep);
+    
+    historicalData.sleep = [...historicalData.sleep.slice(1), currentValues.sleep];
+    
+    return currentValues.sleep;
+}
+
+// Función para actualizar la actividad
+function updateActivity() {
+    currentValues.activity = getRandomValue(
+        healthyRanges.activity.min - 1000,
+        healthyRanges.activity.max + 1000,
+        currentValues.activity
+    );
+    
+    document.getElementById('activityValue').textContent = currentValues.activity;
+    updateMetricStatus('activity', currentValues.activity, healthyRanges.activity);
+    
+    historicalData.activity = [...historicalData.activity.slice(1), currentValues.activity];
+    
+    return currentValues.activity;
 }
 
 // Función para actualizar el valor de la presión arterial
 function updateBloodPressure() {
-    const lastSystolic = historicalData.bloodPressure.length > 0 ? 
-        historicalData.bloodPressure[historicalData.bloodPressure.length - 1] : null;
-    
-    const systolic = getRandomValue(
+    currentValues.bloodPressure.systolic = getRandomValue(
         healthyRanges.bloodPressureSystolic.min - 15,
         healthyRanges.bloodPressureSystolic.max + 15,
-        lastSystolic
+        currentValues.bloodPressure.systolic
     );
-    const diastolic = Math.round(systolic * 0.65 + Math.random() * 10);
     
-    document.getElementById('bloodPressureValue').textContent = `${systolic}/${diastolic}`;
-    updateMetricStatus('bloodPressure', systolic, healthyRanges.bloodPressureSystolic);
+    currentValues.bloodPressure.diastolic = Math.round(currentValues.bloodPressure.systolic * 0.65 + Math.random() * 10);
     
-    historicalData.bloodPressure.push(systolic);
-    if (historicalData.bloodPressure.length > 20) {
-        historicalData.bloodPressure.shift();
-    }
+    document.getElementById('bloodPressureValue').textContent = 
+        `${currentValues.bloodPressure.systolic}/${currentValues.bloodPressure.diastolic}`;
+    updateMetricStatus('bloodPressure', currentValues.bloodPressure.systolic, healthyRanges.bloodPressureSystolic);
     
-    return { systolic, diastolic };
+    historicalData.bloodPressure = [...historicalData.bloodPressure.slice(1), currentValues.bloodPressure.systolic];
+    
+    return currentValues.bloodPressure;
 }
 
 // Función para actualizar el ritmo cardíaco
 function updateHeartRate() {
-    const lastHeartRate = historicalData.heartRate.length > 0 ? 
-        historicalData.heartRate[historicalData.heartRate.length - 1] : null;
-    
-    const value = getRandomValue(
+    currentValues.heartRate = getRandomValue(
         healthyRanges.heartRate.min - 10,
         healthyRanges.heartRate.max + 20,
-        lastHeartRate
+        currentValues.heartRate
     );
     
-    document.getElementById('heartRateValue').textContent = value;
-    updateMetricStatus('heartRate', value, healthyRanges.heartRate);
+    document.getElementById('heartRateValue').textContent = currentValues.heartRate;
+    updateMetricStatus('heartRate', currentValues.heartRate, healthyRanges.heartRate);
     
-    historicalData.heartRate.push(value);
-    if (historicalData.heartRate.length > 20) {
-        historicalData.heartRate.shift();
-    }
+    historicalData.heartRate = [...historicalData.heartRate.slice(1), currentValues.heartRate];
     
-    return value;
+    return currentValues.heartRate;
 }
 
 // Inicialización del gráfico
@@ -99,8 +131,8 @@ function initChart() {
         data: {
             labels: Array(20).fill(''),
             datasets: [{
-                label: 'Heart Rate',
-                data: [],
+                label: 'Ritmo Cardíaco',
+                data: historicalData.heartRate,
                 borderColor: '#4f46e5',
                 backgroundColor: gradient,
                 tension: 0.4,
@@ -145,25 +177,48 @@ function initChart() {
 
 // Función para actualizar el gráfico
 function updateChart() {
-    const data = currentMetric === 'heartRate' ? historicalData.heartRate : 
-                 currentMetric === 'bloodPressure' ? historicalData.bloodPressure : [];
+    let data;
+    let color;
+    let label;
+    
+    switch(currentMetric) {
+        case 'heartRate':
+            data = historicalData.heartRate;
+            color = '#4f46e5';
+            label = 'Ritmo Cardíaco';
+            break;
+        case 'bloodPressure':
+            data = historicalData.bloodPressure;
+            color = '#ef4444';
+            label = 'Presión Arterial';
+            break;
+        case 'sleep':
+            data = historicalData.sleep;
+            color = '#10b981';
+            label = 'Calidad del Sueño';
+            break;
+        case 'activity':
+            data = historicalData.activity;
+            color = '#f59e0b';
+            label = 'Actividad Diaria';
+            break;
+        default:
+            data = [];
+            color = '#4f46e5';
+            label = '';
+    }
 
     const ctx = document.getElementById('metricsGraph').getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    
-    if (currentMetric === 'heartRate') {
-        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.2)');
-        gradient.addColorStop(1, 'rgba(79, 70, 229, 0)');
-        metricsChart.data.datasets[0].borderColor = '#4f46e5';
-        metricsChart.data.datasets[0].backgroundColor = gradient;
-    } else if (currentMetric === 'bloodPressure') {
-        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
-        gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
-        metricsChart.data.datasets[0].borderColor = '#ef4444';
-        metricsChart.data.datasets[0].backgroundColor = gradient;
-    }
+    gradient.addColorStop(0, `${color}33`);
+    gradient.addColorStop(1, `${color}00`);
 
+    metricsChart.data.datasets[0].label = label;
     metricsChart.data.datasets[0].data = data;
+    metricsChart.data.datasets[0].borderColor = color;
+    metricsChart.data.datasets[0].backgroundColor = gradient;
+    metricsChart.data.datasets[0].pointBackgroundColor = color;
+
     metricsChart.update('none');
 }
 
@@ -180,24 +235,22 @@ function updateCurrentTime() {
 
 // Inicialización y actualización periódica
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar el gráfico
     initChart();
-    updateCurrentTime();
-    setInterval(updateCurrentTime, 1000);
-
-    // Valores constantes
-    document.getElementById('sleepValue').textContent = '7.5';
-    document.getElementById('activityValue').textContent = '8500';
-    updateMetricStatus('sleep', 7.5, healthyRanges.sleep);
-    updateMetricStatus('activity', 8500, healthyRanges.activity);
 
     // Primera actualización de datos
     updateHeartRate();
     updateBloodPressure();
+    updateSleep();
+    updateActivity();
+    updateChart();
 
-    // Actualización periódica más frecuente
+    // Actualización periódica
     setInterval(() => {
         updateHeartRate();
         updateBloodPressure();
+        updateSleep();
+        updateActivity();
         updateChart();
     }, 2000);
 
@@ -205,19 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.metric-button').forEach(button => {
         button.addEventListener('click', () => {
             document.querySelectorAll('.metric-button').forEach(b => {
-                b.classList.remove('active', 'bg-indigo-600', 'text-white');
-                b.classList.add('bg-gray-100', 'text-gray-700');
+                b.classList.remove('active');
             });
-            button.classList.remove('bg-gray-100', 'text-gray-700');
-            button.classList.add('active', 'bg-indigo-600', 'text-white');
+            button.classList.add('active');
             currentMetric = button.dataset.metric;
-
-            if (currentMetric === 'heartRate') {
-                metricsChart.data.datasets[0].label = 'Ritmo Cardíaco';
-            } else if (currentMetric === 'bloodPressure') {
-                metricsChart.data.datasets[0].label = 'Presión Arterial';
-            }
-
             updateChart();
         });
     });
