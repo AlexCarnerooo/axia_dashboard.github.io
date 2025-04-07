@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./axia-icon.svg" />
+    <link rel="icon" type="image/jpg" href="/logo_axia.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AXIA Dashboard</title>
     <link rel="stylesheet" href="./styles.css">
@@ -19,68 +19,98 @@
         }
       }(window.location))
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-  <body>
-    <div class="dashboard">
-        <header class="header">
-            <h1>AXIA Dashboard</h1>
-            <p class="subtitle">Smart Wristband Monitoring</p>
+  <body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header con logo -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex flex-col items-center">
+                        <div class="flex-shrink-0 mb-2">
+                            <img src="/logo_axia.jpg" alt="AXIA Logo" class="h-20 w-auto object-contain rounded-lg shadow-sm">
+                        </div>
+                        <h1 class="text-2xl font-semibold text-gray-700 tracking-wide">Dashboard</h1>
+                    </div>
+                    <div class="text-sm text-gray-500 bg-gray-50 px-4 py-2 rounded-lg shadow-inner">
+                        <span id="currentTime" class="font-medium"></span>
+                    </div>
+                </div>
+            </div>
         </header>
 
-        <div class="metrics-grid">
-            <div class="metric-card" id="heartRate">
-                <h3>Heart Rate</h3>
-                <div class="metric-value">
-                    <span id="heartRateValue">75</span>
-                    <span class="unit">bpm</span>
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Grid de métricas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Ritmo Cardíaco -->
+                <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Ritmo Cardíaco</h2>
+                        <div id="heartRateStatus" class="status-indicator"></div>
+                    </div>
+                    <div class="flex items-end space-x-2">
+                        <span id="heartRateValue" class="text-3xl font-bold text-gray-900">--</span>
+                        <span class="text-gray-500 mb-1">bpm</span>
+                    </div>
                 </div>
-                <div class="status-indicator" id="heartRateStatus"></div>
+
+                <!-- Presión Arterial -->
+                <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Presión Arterial</h2>
+                        <div id="bloodPressureStatus" class="status-indicator"></div>
+                    </div>
+                    <div class="flex items-end space-x-2">
+                        <span id="bloodPressureValue" class="text-3xl font-bold text-gray-900">--/--</span>
+                        <span class="text-gray-500 mb-1">mmHg</span>
+                    </div>
+                </div>
+
+                <!-- Calidad del Sueño -->
+                <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Calidad del Sueño</h2>
+                        <div id="sleepStatus" class="status-indicator"></div>
+                    </div>
+                    <div class="flex items-end space-x-2">
+                        <span id="sleepValue" class="text-3xl font-bold text-gray-900">--</span>
+                        <span class="text-gray-500 mb-1">horas</span>
+                    </div>
+                </div>
+
+                <!-- Actividad Diaria -->
+                <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Actividad Diaria</h2>
+                        <div id="activityStatus" class="status-indicator"></div>
+                    </div>
+                    <div class="flex items-end space-x-2">
+                        <span id="activityValue" class="text-3xl font-bold text-gray-900">--</span>
+                        <span class="text-gray-500 mb-1">pasos</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="metric-card" id="bloodPressure">
-                <h3>Blood Pressure</h3>
-                <div class="metric-value">
-                    <span id="bloodPressureValue">120/80</span>
-                    <span class="unit">mmHg</span>
+            <!-- Gráfico y controles -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">Métricas Detalladas</h2>
+                    <div class="flex space-x-2">
+                        <button class="metric-button active px-4 py-2 rounded-lg bg-indigo-600 text-white" data-metric="heartRate">
+                            Ritmo Cardíaco
+                        </button>
+                        <button class="metric-button px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-metric="bloodPressure">
+                            Presión Arterial
+                        </button>
+                    </div>
                 </div>
-                <div class="status-indicator" id="bloodPressureStatus"></div>
-            </div>
-
-            <div class="metric-card" id="sleep">
-                <h3>Sleep Quality</h3>
-                <div class="metric-value">
-                    <span id="sleepValue">7.5</span>
-                    <span class="unit">hours</span>
-                </div>
-                <div class="status-indicator" id="sleepStatus"></div>
-            </div>
-
-            <div class="metric-card" id="activity">
-                <h3>Daily Activity</h3>
-                <div class="metric-value">
-                    <span id="activityValue">8500</span>
-                    <span class="unit">steps</span>
-                </div>
-                <div class="status-indicator" id="activityStatus"></div>
-            </div>
-        </div>
-
-        <div class="detail-section">
-            <div class="detail-header">
-                <h2>Detailed Metrics</h2>
-                <div class="metric-selector">
-                    <button class="metric-button active" data-metric="heartRate">Heart Rate</button>
-                    <button class="metric-button" data-metric="bloodPressure">Blood Pressure</button>
-                    <button class="metric-button" data-metric="sleep">Sleep</button>
-                    <button class="metric-button" data-metric="activity">Activity</button>
+                <div class="h-96">
+                    <canvas id="metricsGraph"></canvas>
                 </div>
             </div>
-            <div class="graph-container" id="graphContainer">
-                <canvas id="metricsGraph"></canvas>
-            </div>
-        </div>
+        </main>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./dashboard.js"></script>
+    <script src="dashboard.js"></script>
   </body>
 </html>
