@@ -102,9 +102,44 @@
             max-width: 800px;
         }
 
-        .header img {
+        .header .logos-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header .logo {
             height: 45px;
             object-fit: contain;
+        }
+
+        .header .logo.erostars {
+            background: transparent;
+            padding: 8px 12px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Times New Roman', Times, serif;
+            color: #1e2b7c;
+            text-decoration: none;
+            line-height: 1.2;
+            font-weight: 500;
+        }
+
+        .header .logo.erostars .main-text {
+            font-size: 18px;
+            letter-spacing: 4px;
+            font-weight: 600;
+            color: #1e2b7c;
+        }
+
+        .header .logo.erostars .sub-text {
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+            color: #666;
+            margin-top: 2px;
         }
 
         .header .title-container {
@@ -303,6 +338,24 @@
             .metric-card {
                 padding: 15px;
             }
+
+            .header .logo {
+                height: 35px;
+            }
+            
+            .header .logo.erostars {
+                padding: 6px 10px;
+            }
+
+            .header .logo.erostars .main-text {
+                font-size: 16px;
+                letter-spacing: 3px;
+            }
+
+            .header .logo.erostars .sub-text {
+                font-size: 11px;
+                letter-spacing: 1px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -314,8 +367,22 @@
                 padding: 10px;
             }
 
-            .header img {
+            .header .logo {
                 height: 32px;
+            }
+            
+            .header .logo.erostars {
+                padding: 5px 8px;
+            }
+
+            .header .logo.erostars .main-text {
+                font-size: 14px;
+                letter-spacing: 2.5px;
+            }
+
+            .header .logo.erostars .sub-text {
+                font-size: 10px;
+                letter-spacing: 0.8px;
             }
 
             .header .roi-title {
@@ -363,7 +430,13 @@
     <div class="dashboard">
         <header class="header">
             <div class="left-section">
-                <img src="public/axia_logo_new.jpg" alt="AXIA Logo" style="height: 45px; object-fit: contain;">
+                <div class="logos-container">
+                    <img src="public/axia_logo_new.jpg" alt="AXIA Logo" class="logo">
+                    <div class="logo erostars">
+                        <span class="main-text">EUROSTARS</span>
+                        <span class="sub-text">HOTEL COMPANY</span>
+                    </div>
+                </div>
                 <div class="title-container">
                     <div class="main-title">
                         <span class="roi-title">Constantes ROI</span>
